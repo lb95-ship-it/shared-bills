@@ -1,1 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Lizzy &amp; James — Bill Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0efe8;color:#1a1a1a;padding:1rem;min-height:100vh}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:1.2rem;font-weight:700;margin-bottom:.15rem}
+.sub{font-size:.78rem;color:#888;margin-bottom:1rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem}
+.card{background:#fff;border-radius:12px;padding:.85rem 1rem;border:1px solid #e2e0d8}
+.card .clabel{font-size:.68rem;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+.card .cval{font-size:1.35rem;font-weight:700}
+.owe{color:#c0392b}.neutral{color:#1a1a1a}.zero{color:#aaa}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;padding:7px 14px;border-radius:8px;cursor:pointer;border:1px solid #d0cfc8;background:#fff;color:#1a1a1a;font-family:inherit;font-weight:500}
+.btn:hover{background:#f5f4ee}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333}
+.btn-sm{font-size:.7rem;padding:3px 9px;border-radius:6px}
+.btn-danger{color:#c0392b;border-color:#f5c6c6}
+.btn-danger:hover{background:#fff0f0}
+.btn-success{background:#27ae60;color:#fff;border-color:#27ae60}
+.btn-success:hover{background:#219a52}
+.sync-bar{display:flex;align-items:center;gap:8px;font-size:.72rem;color:#888;margin-bottom:1rem;padding:.5rem .75rem;background:#fff;border:1px solid #e2e0d8;border-radius:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.ok{background:#27ae60}
+.sync-dot.err{background:#c0392b}
+.sync-dot.loading{background:#e67e22;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.view-tabs{display:flex;gap:6px;margin-bottom:1rem}
+.view-tab{font-size:.78rem;padding:6px 16px;border-radius:20px;cursor:pointer;border:1px solid #d0cfc8;background:#fff;color:#666;font-family:inherit;font-weight:500}
+.view-tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.form-box{background:#fff;border:1px solid #e2e0d8;border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px}
+.field label{display:block;font-size:.7rem;color:#888;margin-bottom:3px;font-weight:500}
+.field input,.field select{width:100%;font-size:.8rem;padding:6px 9px;border:1px solid #d0cfc8;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit}
+.field input:focus,.field select:focus{outline:2px solid #1a1a1a;outline-offset:1px}
+.split-box{background:#f5f4ee;border-radius:8px;padding:.85rem 1rem;margin-bottom:12px}
+.split-row{display:flex;justify-content:space-between;font-size:.75rem;color:#666}
+input[type=range]{width:100%;margin:6px 0;accent-color:#1a1a1a}
+.mode-btns{display:flex;gap:6px;margin-bottom:10px}
+.mode-btn{font-size:.72rem;padding:4px 12px;border-radius:6px;cursor:pointer;border:1px solid #d0cfc8;background:transparent;color:#1a1a1a;font-family:inherit}
+.mode-btn.active{background:#fff;font-weight:600;border-color:#888}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.readonly{background:#f5f4ee!important;color:#888!important}
+.error-msg{font-size:.75rem;color:#c0392b;background:#fdf0f0;border-radius:6px;padding:6px 10px;margin-bottom:10px;border:1px solid #f5c6c6}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.method-section{background:#f5f4ee;border-radius:8px;padding:.75rem 1rem}
+.method-label{font-size:.68rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.filter-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-tab{font-size:.72rem;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid #d0cfc8;background:transparent;color:#666;font-family:inherit}
+.filter-tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.table-box{background:#fff;border:1px solid #e2e0d8;border-radius:12px;overflow:hidden}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;padding:9px 10px;font-size:.68rem;color:#999;font-weight:600;border-bottom:2px solid #e2e0d8;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;background:#faf9f5}
+td{padding:9px 10px;border-bottom:1px solid #f0efe8;vertical-align:middle}
+tr.row-paid{background:#f0faf4}
+tr.row-overdue{background:#fff8f8}
+tr.row-upcoming{background:#fff}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.badge-paid{background:#d4edda;color:#155724;border:1px solid #b8dfc4}
+.badge-due{background:#fff3cd;color:#856404;border:1px solid #ffd97d}
+.badge-overdue{background:#f8d7da;color:#721c24;border:1px solid #f1aeb5}
+.badge-recurring{background:#cce5ff;color:#004085;border:1px solid #99caff}
+.bdot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dp{background:#27ae60}.dd{background:#e67e22}.do{background:#c0392b}.dr{background:#2980b9}
+.person-chip{display:inline-block;font-size:.68rem;padding:2px 8px;border-radius:20px;font-weight:600}
+.chip-lizzy{background:#fce4ec;color:#880e4f;border:1px solid #f48fb1}
+.chip-james{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9}
+.method-chip{display:inline-block;font-size:.65rem;padding:2px 7px;border-radius:6px;background:#f0efe8;color:#666;border:1px solid #ddd;margin-top:2px}
+.empty{padding:2rem;text-align:center;color:#bbb;font-size:.85rem}
+.actions{display:flex;gap:4px;white-space:nowrap}
+.footer{font-size:.7rem;color:#bbb;text-align:right;margin-top:8px}
+.cal-wrap{background:#fff;border:1px solid #e2e0d8;border-radius:12px;overflow:hidden}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid #e2e0d8;background:#faf9f5}
+.cal-title{font-size:1rem;font-weight:700}
+.cal-nav{display:flex;gap:6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{text-align:center;font-size:.65rem;font-weight:600;color:#aaa;padding:.5rem 0;text-transform:uppercase;border-bottom:1px solid #f0efe8}
+.cal-cell{min-height:72px;padding:4px;border-right:1px solid #f0efe8;border-bottom:1px solid #f0efe8}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-day-num{font-size:.72rem;font-weight:600;color:#aaa;margin-bottom:2px}
+.cal-day-num.today{background:#1a1a1a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.68rem}
+.cal-day-num.cur{color:#1a1a1a}
+.cal-pill{font-size:.6rem;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block}
+.cp-paid{background:#d4edda;color:#155724}
+.cp-overdue{background:#f8d7da;color:#721c24}
+.cp-due{background:#fff3cd;color:#856404}
+.cp-recurring{background:#cce5ff;color:#004085}
+.cal-empty{min-height:72px;border-right:1px solid #f0efe8;border-bottom:1px solid #f0efe8;background:#faf9f5}
+.cal-empty:nth-child(7n){border-right:none}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;padding:.75rem 1.1rem;border-top:1px solid #f0efe8;font-size:.68rem;color:#666;background:#faf9f5}
+.cal-legend span{display:flex;align-items:center;gap:4px}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏠 Lizzy &amp; James</h1>
+  <div class="sub">Household bill tracker</div>
+  <div class="sync-bar">
+    <div class="sync-dot loading" id="syncDot"></div>
+    <span id="syncMsg">Connecting to shared sheet…</span>
+    <button class="btn btn-sm" style="margin-left:auto" onclick="saveBills()">💾 Save</button>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div class="view-tabs">
+      <button class="view-tab active" id="vt-list" onclick="setView('list')">📋 List</button>
+      <button class="view-tab" id="vt-cal" onclick="setView('cal')">📅 Calendar</button>
+    </div>
+    <button class="btn" id="toggleFormBtn" onclick="toggleForm()">+ Add bill</button>
+  </div>
+
+  <div class="form-box" id="formBox" style="display:none">
+    <div style="font-size:.88rem;font-weight:700;margin-bottom:12px" id="formTitle">Add a bill</div>
+    <div class="error-msg" id="formError" style="display:none"></div>
+    <div class="form-grid">
+      <div class="field"><label>Bill name</label><input id="f-name" placeholder="e.g. Electricity"/></div>
+      <div class="field"><label>Category</label>
+        <select id="f-cat">
+          <option>Rent/Mortgage</option><option selected>Utilities</option><option>Internet</option>
+          <option>Groceries</option><option>Streaming</option><option>Insurance</option>
+          <option>Phone</option><option>Subscriptions</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Total ($)</label><input id="f-amount" type="number" min="0" step="0.01" placeholder="0.00"/></div>
+      <div class="field"><label>Due date</label><input id="f-due" type="date"/></div>
+      <div class="field"><label>Recurring?</label>
+        <select id="f-recur">
+          <option>One-time</option><option>Weekly</option><option>Bi-weekly</option>
+          <option>Monthly</option><option>Bi-monthly</option><option>Annually</option>
+        </select>
+      </div>
+    </div>
+    <div class="method-grid">
+      <div class="method-section">
+        <div class="method-label">🩷 Lizzy</div>
+        <div class="field" style="margin-bottom:6px"><label>Paid?</label>
+          <select id="f-lizzy-paid"><option value="no">Not yet</option><option value="yes">Yes, paid</option></select>
+        </div>
+        <div class="field"><label>Method</label>
+          <select id="f-lizzy-method">
+            <option>Venmo</option><option>Zelle</option><option>Cash App</option><option>Apple Pay</option>
+            <option>Cash</option><option>Credit card</option><option>Bank transfer</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="method-section">
+        <div class="method-label">💙 James</div>
+        <div class="field" style="margin-bottom:6px"><label>Paid?</label>
+          <select id="f-james-paid"><option value="no">Not yet</option><option value="yes">Yes, paid</option></select>
+        </div>
+        <div class="field"><label>Method</label>
+          <select id="f-james-method">
+            <option>Venmo</option><option>Zelle</option><option>Cash App</option><option>Apple Pay</option>
+            <option>Cash</option><option>Credit card</option><option>Bank transfer</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="split-box">
+      <div style="font-size:.7rem;color:#888;margin-bottom:8px;font-weight:600">SPLIT</div>
+      <div class="mode-btns">
+        <button class="mode-btn active" id="modeBtn-pct" onclick="setSplitMode('pct')">By %</button>
+        <button class="mode-btn" id="modeBtn-manual" onclick="setSplitMode('manual')">By $</button>
+      </div>
+      <div id="split-pct">
+        <div class="split-row"><span id="pct-lizzy">Lizzy 50%</span><span id="pct-james">James 50%</span></div>
+        <input type="range" id="f-split" min="0" max="100" value="50" step="1" oninput="updateSplitPreview()"/>
+        <div class="split-row"><span id="amt-lizzy">$0.00</span><span id="amt-james">$0.00</span></div>
+      </div>
+      <div id="split-manual" style="display:none">
+        <div class="manual-grid">
+          <div class="field"><label>Lizzy ($)</label><input id="f-splitamt" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateManualPreview()"/></div>
+          <div class="field"><label>James ($)</label><input id="f-splitamt2" class="readonly" readonly placeholder="0.00"/></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">Add bill</button>
+      <button class="btn" onclick="cancelForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div id="listView">
+    <div class="filter-tabs" id="filterTabs"></div>
+    <div class="table-box"><div id="billsContainer"><div class="empty">Loading…</div></div></div>
+  </div>
+
+  <div id="calView" style="display:none">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <div class="cal-nav">
+          <button class="btn btn-sm" onclick="calPrev()">‹</button>
+          <button class="btn btn-sm" onclick="calToday()">Today</button>
+        </div>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="btn btn-sm" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calDows"></div>
+      <div class="cal-grid" id="calCells"></div>
+      <div class="cal-legend">
+        <span><span class="leg-dot" style="background:#d4edda;border:1px solid #b8dfc4"></span>Paid</span>
+        <span><span class="leg-dot" style="background:#fff3cd;border:1px solid #ffd97d"></span>Due</span>
+        <span><span class="leg-dot" style="background:#f8d7da;border:1px solid #f1aeb5"></span>Overdue</span>
+        <span><span class="leg-dot" style="background:#cce5ff;border:1px solid #99caff"></span>Recurring</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5fiLILk4Qj-UUaYjaflXecFUkZcBbB8OqiGIKfasWg8EYMTU4_pI55wG50m7w_2I8/exec";
+var bills = [];
+var editId = null;
+var currentFilter = 'all';
+var splitMode = 'pct';
+var saving = false;
+var currentView = 'list';
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+
+function syncStatus(state, msg) {
+  document.getElementById('syncDot').className = 'sync-dot ' + state;
+  document.getElementById('syncMsg').textContent = msg;
+}
+
+function strVal(v, fallback) {
+  var s = String(v == null ? '' : v).trim();
+  return s !== '' ? s : fallback;
+}
+
+function parseBill(b) {
+  var s1 = parseFloat(b.sharesS1);
+  if (isNaN(s1)) s1 = (b.shares && b.shares.s1) ? b.shares.s1 : 0;
+  var s2 = parseFloat(b.sharesS2);
+  if (isNaN(s2)) s2 = (b.shares && b.shares.s2) ? b.shares.s2 : 0;
+  return {
+    id: Number(b.id),
+    name: b.name || '',
+    category: b.category || 'Other',
+    amount: parseFloat(b.amount) || 0,
+    due: strVal(b.due, ''),
+    paidBy: strVal(b.paidBy, 'Not yet paid'),
+    method: strVal(b.method, 'Venmo'),
+    recur: strVal(b.recur, 'One-time'),
+    split: parseInt(b.split) || 50,
+    shares: { s1: s1, s2: s2 },
+    status: strVal(b.status, 'unpaid'),
+    splitMode: strVal(b.splitMode, 'pct'),
+    lizzyPaid: strVal(b.lizzyPaid, 'no'),
+    lizzyMethod: strVal(b.lizzyMethod, 'Venmo'),
+    jamesPaid: strVal(b.jamesPaid, 'no'),
+    jamesMethod: strVal(b.jamesMethod, 'Venmo')
+  };
+}
+
+function loadBills() {
+  syncStatus('loading', 'Syncing with shared sheet…');
+  fetch(SCRIPT_URL)
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      bills = Array.isArray(data) ? data.map(parseBill) : [];
+      syncStatus('ok', 'Synced · ' + new Date().toLocaleTimeString());
+      render();
+    })
+    .catch(function() {
+      syncStatus('err', 'Could not connect — showing cached data');
+      try { bills = JSON.parse(localStorage.getItem('hbt-v3') || '[]'); } catch(e) { bills = []; }
+      render();
+    });
+}
+
+function saveBills() {
+  if (saving) return;
+  saving = true;
+  syncStatus('loading', 'Saving…');
+  try { localStorage.setItem('hbt-v3', JSON.stringify(bills)); } catch(e) {}
+  fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save', bills: bills }) })
+    .then(function() {
+      syncStatus('ok', 'Saved · ' + new Date().toLocaleTimeString());
+      saving = false;
+    })
+    .catch(function() {
+      syncStatus('err', 'Save failed — cached locally');
+      saving = false;
+    });
+}
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function fmt(n) { return '$' + Math.abs(parseFloat(n) || 0).toFixed(2); }
+function fmtDate(d) {
+  if (!d) return '—';
+  var clean = String(d).split('T')[0].trim();
+  var parts = clean.split('-');
+  if (parts.length !== 3) return clean;
+  return parts[1] + '/' + parts[2] + '/' + parts[0];
+}
+function isOverdue(b) { return b.due && b.due < todayStr() && b.status !== 'paid'; }
+function billStatus(b) {
+  if (b.status === 'paid') return 'paid';
+  if (isOverdue(b)) return 'overdue';
+  if (b.recur && b.recur !== 'One-time') return 'recurring';
+  return 'due';
+}
+function getSplitDisplay(b) {
+  var s1 = b.shares ? b.shares.s1 || 0 : 0;
+  var s2 = b.shares ? b.shares.s2 || 0 : 0;
+  var total = b.amount || 0;
+  if (!total) return '—';
+  if (b.splitMode === 'manual') return '$' + s1.toFixed(2) + ' / $' + s2.toFixed(2);
+  var p1 = Math.round((s1 / total) * 100);
+  return p1 + '% / ' + (100 - p1) + '%';
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
+  document.getElementById('calView').style.display = v === 'cal' ? 'block' : 'none';
+  document.getElementById('vt-list').classList.toggle('active', v === 'list');
+  document.getElementById('vt-cal').classList.toggle('active', v === 'cal');
+  if (v === 'cal') renderCalendar();
+}
+
+function setSplitMode(m) {
+  splitMode = m;
+  document.getElementById('split-pct').style.display = m === 'pct' ? 'block' : 'none';
+  document.getElementById('split-manual').style.display = m === 'manual' ? 'block' : 'none';
+  document.getElementById('modeBtn-pct').classList.toggle('active', m === 'pct');
+  document.getElementById('modeBtn-manual').classList.toggle('active', m === 'manual');
+}
+
+function updateSplitPreview() {
+  var total = parseFloat(document.getElementById('f-amount').value) || 0;
+  var pct = parseInt(document.getElementById('f-split').value);
+  var s1 = +((pct / 100) * total).toFixed(2);
+  document.getElementById('pct-lizzy').textContent = 'Lizzy ' + pct + '%';
+  document.getElementById('pct-james').textContent = 'James ' + (100 - pct) + '%';
+  document.getElementById('amt-lizzy').textContent = fmt(s1);
+  document.getElementById('amt-james').textContent = fmt(total - s1);
+}
+
+function updateManualPreview() {
+  var total = parseFloat(document.getElementById('f-amount').value) || 0;
+  var s1 = Math.min(Math.max(parseFloat(document.getElementById('f-splitamt').value) || 0, 0), total);
+  document.getElementById('f-splitamt2').value = (total - s1).toFixed(2);
+}
+
+function getShares() {
+  var total = parseFloat(document.getElementById('f-amount').value) || 0;
+  if (splitMode === 'manual') {
+    var s1 = Math.min(Math.max(parseFloat(document.getElementById('f-splitamt').value) || 0, 0), total);
+    return { s1: +s1.toFixed(2), s2: +(total - s1).toFixed(2) };
+  }
+  var pct = parseInt(document.getElementById('f-split').value);
+  var s1b = +((pct / 100) * total).toFixed(2);
+  return { s1: s1b, s2: +(total - s1b).toFixed(2) };
+}
+
+function toggleForm() {
+  var box = document.getElementById('formBox');
+  if (box.style.display !== 'none') { cancelForm(); }
+  else { editId = null; resetForm(); box.style.display = 'block'; document.getElementById('toggleFormBtn').textContent = '✕ Cancel'; }
+}
+
+function cancelForm() {
+  document.getElementById('formBox').style.display = 'none';
+  document.getElementById('toggleFormBtn').textContent = '+ Add bill';
+  resetForm();
+  editId = null;
+}
+
+function resetForm() {
+  ['f-name', 'f-amount', 'f-due', 'f-splitamt', 'f-splitamt2'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('f-cat').value = 'Utilities';
+  document.getElementById('f-recur').value = 'One-time';
+  document.getElementById('f-split').value = 50;
+  document.getElementById('f-lizzy-paid').value = 'no';
+  document.getElementById('f-lizzy-method').value = 'Venmo';
+  document.getElementById('f-james-paid').value = 'no';
+  document.getElementById('f-james-method').value = 'Venmo';
+  setSplitMode('pct');
+  updateSplitPreview();
+  document.getElementById('formError').style.display = 'none';
+  document.getElementById('formTitle').textContent = editId ? 'Edit bill' : 'Add a bill';
+  document.getElementById('submitBtn').textContent = editId ? 'Save changes' : 'Add bill';
+}
+
+function submitForm() {
+  var name = document.getElementById('f-name').value.trim();
+  var amount = parseFloat(document.getElementById('f-amount').value);
+  var errEl = document.getElementById('formError');
+  if (!name || isNaN(amount) || amount <= 0) {
+    errEl.textContent = 'Please enter a bill name and valid amount.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  var shares = getShares();
+  var pct = splitMode === 'pct' ? parseInt(document.getElementById('f-split').value) : 50;
+  var lizzyPaid = document.getElementById('f-lizzy-paid').value;
+  var jamesPaid = document.getElementById('f-james-paid').value;
+  var status = (lizzyPaid === 'yes' && jamesPaid === 'yes') ? 'paid' : 'unpaid';
+  var bill = {
+    id: editId || Date.now(),
+    name: name,
+    category: document.getElementById('f-cat').value,
+    amount: amount,
+    due: document.getElementById('f-due').value,
+    recur: document.getElementById('f-recur').value,
+    split: pct,
+    shares: shares,
+    status: status,
+    splitMode: splitMode,
+    lizzyPaid: lizzyPaid,
+    lizzyMethod: document.getElementById('f-lizzy-method').value,
+    jamesPaid: jamesPaid,
+    jamesMethod: document.getElementById('f-james-method').value,
+    paidBy: lizzyPaid === 'yes' ? 'Lizzy' : jamesPaid === 'yes' ? 'James' : 'Not yet paid',
+    method: document.getElementById('f-lizzy-method').value
+  };
+  if (editId) {
+    bills = bills.map(function(b) { return b.id === editId ? bill : b; });
+  } else {
+    bills.push(bill);
+  }
+  saveBills();
+  cancelForm();
+  render();
+}
+
+function startEdit(id) {
+  var b = null;
+  bills.forEach(function(x) { if (x.id === id) b = x; });
+  if (!b) return;
+  editId = id;
+  document.getElementById('formBox').style.display = 'block';
+  document.getElementById('toggleFormBtn').textContent = '✕ Cancel';
+  document.getElementById('formTitle').textContent = 'Edit bill';
+  document.getElementById('submitBtn').textContent = 'Save changes';
+  document.getElementById('f-name').value = b.name;
+  document.getElementById('f-cat').value = b.category || 'Other';
+  document.getElementById('f-amount').value = b.amount;
+  document.getElementById('f-due').value = b.due ? String(b.due).split('T')[0] : '';
+  document.getElementById('f-recur').value = b.recur || 'One-time';
+  document.getElementById('f-split').value = b.split || 50;
+  document.getElementById('f-lizzy-paid').value = b.lizzyPaid || 'no';
+  document.getElementById('f-lizzy-method').value = b.lizzyMethod || 'Venmo';
+  document.getElementById('f-james-paid').value = b.jamesPaid || 'no';
+  document.getElementById('f-james-method').value = b.jamesMethod || 'Venmo';
+  setSplitMode(b.splitMode || 'pct');
+  if (b.splitMode === 'manual') {
+    document.getElementById('f-splitamt').value = b.shares ? b.shares.s1 : '';
+    updateManualPreview();
+  } else {
+    updateSplitPreview();
+  }
+  window.scrollTo(0, 0);
+}
+
+function togglePaid(id) {
+  bills = bills.map(function(b) {
+    if (b.id !== id) return b;
+    var ns = b.status === 'paid' ? 'unpaid' : 'paid';
+    var newBill = {};
+    for (var k in b) newBill[k] = b[k];
+    newBill.status = ns;
+    newBill.lizzyPaid = ns === 'paid' ? 'yes' : 'no';
+    newBill.jamesPaid = ns === 'paid' ? 'yes' : 'no';
+    return newBill;
+  });
+  saveBills();
+  render();
+}
+
+function deleteBill(id) {
+  if (!confirm('Delete this bill?')) return;
+  bills = bills.filter(function(b) { return b.id !== id; });
+  saveBills();
+  render();
+}
+
+function setFilter(f) { currentFilter = f; render(); }
+
+function render() {
+  renderSummary();
+  renderList();
+  if (currentView === 'cal') renderCalendar();
+  document.getElementById('footer').textContent = bills.length + ' bill' + (bills.length !== 1 ? 's' : '') + ' · synced with Google Sheets';
+}
+
+function renderSummary() {
+  var lizzy = 0, james = 0, unpaid = 0, overdueCnt = 0;
+  bills.forEach(function(b) {
+    if (b.status !== 'paid') {
+      var s1 = b.shares ? b.shares.s1 || 0 : 0;
+      var s2 = b.shares ? b.shares.s2 || 0 : 0;
+      if (b.lizzyPaid !== 'yes') lizzy += s1;
+      if (b.jamesPaid !== 'yes') james += s2;
+      unpaid += b.amount;
+    }
+    if (isOverdue(b)) overdueCnt++;
+  });
+  var items = [
+    { l: 'Lizzy owes', v: fmt(lizzy), cls: lizzy > 0 ? 'owe' : 'zero' },
+    { l: 'James owes', v: fmt(james), cls: james > 0 ? 'owe' : 'zero' },
+    { l: 'Unpaid total', v: fmt(unpaid), cls: 'neutral' },
+    { l: 'Overdue', v: String(overdueCnt), cls: overdueCnt > 0 ? 'owe' : 'zero' }
+  ];
+  var html = '';
+  items.forEach(function(c) {
+    html += '<div class="card"><div class="clabel">' + c.l + '</div><div class="cval ' + c.cls + '">' + c.v + '</div></div>';
+  });
+  document.getElementById('cards').innerHTML = html;
+}
+
+function renderList() {
+  var overdueCnt = bills.filter(isOverdue).length;
+  var tabs = ['all', 'unpaid', 'paid', 'overdue'];
+  var tabHtml = '';
+  tabs.forEach(function(t) {
+    var label = t.charAt(0).toUpperCase() + t.slice(1);
+    if (t === 'overdue' && overdueCnt > 0) label += ' (' + overdueCnt + ')';
+    tabHtml += '<button class="filter-tab' + (currentFilter === t ? ' active' : '') + '" onclick="setFilter(\'' + t + '\')">' + label + '</button>';
+  });
+  document.getElementById('filterTabs').innerHTML = tabHtml;
+
+  var list = bills.filter(function(b) {
+    if (currentFilter === 'unpaid') return b.status !== 'paid';
+    if (currentFilter === 'paid') return b.status === 'paid';
+    if (currentFilter === 'overdue') return isOverdue(b);
+    return true;
+  }).sort(function(a, b) {
+    if (!a.due && !b.due) return 0;
+    if (!a.due) return 1;
+    if (!b.due) return -1;
+    return String(a.due).localeCompare(String(b.due));
+  });
+
+  var container = document.getElementById('billsContainer');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty">' + (currentFilter === 'all' ? 'No bills yet — add one above.' : 'No bills match this filter.') + '</div>';
+    return;
+  }
+
+  var rows = '';
+  list.forEach(function(b) {
+    var st = billStatus(b);
+    var rowCls = st === 'paid' ? 'row-paid' : st === 'overdue' ? 'row-overdue' : 'row-upcoming';
+    var s1 = b.shares ? b.shares.s1 || 0 : 0;
+    var s2 = b.shares ? b.shares.s2 || 0 : 0;
+    var opacity = st === 'paid' ? '0.7' : '1';
+
+    var badge = '';
+    if (st === 'paid') badge = '<span class="badge badge-paid"><span class="bdot dp"></span>Paid</span>';
+    else if (st === 'overdue') badge = '<span class="badge badge-overdue"><span class="bdot do"></span>Overdue</span>';
+    else if (st === 'recurring') badge = '<span class="badge badge-recurring"><span class="bdot dr"></span>Recurring</span>';
+    else badge = '<span class="badge badge-due"><span class="bdot dd"></span>Due</span>';
+
+    var lPaid = b.lizzyPaid === 'yes'
+      ? '<span style="font-size:.65rem;color:#27ae60;font-weight:600">✓ Paid</span>'
+      : '<span style="font-size:.65rem;color:#e67e22;font-weight:600">Owes</span>';
+    var jPaid = b.jamesPaid === 'yes'
+      ? '<span style="font-size:.65rem;color:#27ae60;font-weight:600">✓ Paid</span>'
+      : '<span style="font-size:.65rem;color:#e67e22;font-weight:600">Owes</span>';
+
+    var lizzyCell = '<div><span class="person-chip chip-lizzy">🩷 Lizzy</span></div>'
+      + '<div style="font-size:.7rem;color:#666;margin-top:2px">$' + s1.toFixed(2) + '</div>'
+      + '<div>' + lPaid + '</div>'
+      + '<span class="method-chip">' + (b.lizzyMethod || '—') + '</span>';
+
+    var jamesCell = '<div><span class="person-chip chip-james">💙 James</span></div>'
+      + '<div style="font-size:.7rem;color:#666;margin-top:2px">$' + s2.toFixed(2) + '</div>'
+      + '<div>' + jPaid + '</div>'
+      + '<span class="method-chip">' + (b.jamesMethod || '—') + '</span>';
+
+    var dueColor = st === 'overdue' ? '#c0392b' : st === 'paid' ? '#27ae60' : '#1a1a1a';
+    var dueFw = st === 'overdue' ? '700' : '400';
+    var paidBtnCls = st === 'paid' ? 'btn btn-sm' : 'btn btn-sm btn-success';
+    var paidBtnLbl = st === 'paid' ? 'Unmark' : '✓ Paid';
+
+    rows += '<tr class="' + rowCls + '" style="opacity:' + opacity + '">'
+      + '<td><div style="font-weight:600">' + b.name + '</div><div style="font-size:.68rem;color:#aaa">' + (b.category || '') + '</div></td>'
+      + '<td style="font-weight:700;white-space:nowrap;font-size:.9rem">$' + (b.amount || 0).toFixed(2) + '</td>'
+      + '<td style="font-size:.72rem;color:#888;white-space:nowrap">' + getSplitDisplay(b) + '</td>'
+      + '<td>' + lizzyCell + '</td>'
+      + '<td>' + jamesCell + '</td>'
+      + '<td style="font-size:.75rem;white-space:nowrap;color:' + dueColor + ';font-weight:' + dueFw + '">' + fmtDate(b.due) + '</td>'
+      + '<td style="font-size:.72rem;color:#aaa;white-space:nowrap">' + (b.recur || 'One-time') + '</td>'
+      + '<td>' + badge + '</td>'
+      + '<td><div class="actions">'
+      + '<button class="' + paidBtnCls + '" onclick="togglePaid(' + b.id + ')">' + paidBtnLbl + '</button>'
+      + '<button class="btn btn-sm" onclick="startEdit(' + b.id + ')">Edit</button>'
+      + '<button class="btn btn-sm btn-danger" onclick="deleteBill(' + b.id + ')">✕</button>'
+      + '</div></td></tr>';
+  });
+
+  container.innerHTML = '<div class="tbl-wrap"><table>'
+    + '<thead><tr><th>Bill</th><th>Amount</th><th>Split</th><th>Lizzy</th><th>James</th><th>Due</th><th>Recurs</th><th>Status</th><th></th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table></div>';
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); renderCalendar(); }
+
+function renderCalendar() {
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent = months[calMonth] + ' ' + calYear;
+  var dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var dowHtml = '';
+  dows.forEach(function(d) { dowHtml += '<div class="cal-dow">' + d + '</div>'; });
+  document.getElementById('calDows').innerHTML = dowHtml;
+
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  var todayFull = todayStr();
+
+  var byDate = {};
+  bills.forEach(function(b) {
+    if (!b.due) return;
+    var clean = String(b.due).split('T')[0];
+    var parts = clean.split('-');
+    if (parts.length === 3 && parseInt(parts[0]) === calYear && parseInt(parts[1]) - 1 === calMonth) {
+      var day = parseInt(parts[2]);
+      if (!byDate[day]) byDate[day] = [];
+      byDate[day].push(b);
+    }
+  });
+
+  var cells = '';
+  for (var i = 0; i < firstDay; i++) cells += '<div class="cal-empty"></div>';
+  for (var d = 1; d <= daysInMonth; d++) {
+    var mm = String(calMonth + 1);
+    if (mm.length < 2) mm = '0' + mm;
+    var dd = String(d);
+    if (dd.length < 2) dd = '0' + dd;
+    var dateStr = calYear + '-' + mm + '-' + dd;
+    var isToday = dateStr === todayFull;
+    var numCls = isToday ? 'cal-day-num today' : 'cal-day-num cur';
+    var dayBills = byDate[d] || [];
+    var pills = '';
+    dayBills.forEach(function(b) {
+      var st = billStatus(b);
+      var cls = st === 'paid' ? 'cp-paid' : st === 'overdue' ? 'cp-overdue' : st === 'recurring' ? 'cp-recurring' : 'cp-due';
+      pills += '<span class="cal-pill ' + cls + '" title="' + b.name + ' - $' + b.amount.toFixed(2) + '">' + b.name + '</span>';
+    });
+    cells += '<div class="cal-cell"><div class="' + numCls + '">' + d + '</div>' + pills + '</div>';
+  }
+  document.getElementById('calCells').innerHTML = cells;
+}
+
+document.getElementById('f-amount').addEventListener('input', function() { updateSplitPreview(); updateManualPreview(); });
+loadBills();
+</script>
+</body>
+</html>
 
