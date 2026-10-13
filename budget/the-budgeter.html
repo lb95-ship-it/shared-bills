@@ -88,15 +88,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   .ac-input{background:rgba(255,255,255,0.06)}
   .ac-input:focus{background:rgba(255,255,255,0.1)}
 }
-.ac-after-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:500;opacity:.55;margin-top:10px;margin-bottom:2px}
-.acct-card.spend .ac-after-lbl{color:var(--spend-mid)}
-.acct-card.living .ac-after-lbl{color:var(--living-mid)}
-.acct-card.sav .ac-after-lbl{color:var(--sav-mid)}
-.ac-after{font-size:15px;font-weight:600;font-family:'DM Mono',monospace}
-.acct-card.spend .ac-after{color:var(--spend)}
-.acct-card.living .ac-after{color:var(--living-mid)}
-.acct-card.sav .ac-after{color:var(--sav-mid)}
-.ac-after.neg{color:var(--danger)!important}
 
 .weekly-bar{background:var(--bg2);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px;display:flex;align-items:center;border:1px solid var(--border)}
 .wb-col{flex:1;padding:0 .25rem}
@@ -107,32 +98,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .wr.wr-sm{font-size:22px;color:var(--text2)}
 .wr.neg{color:var(--danger)!important}
 
-.pay-panel{background:var(--bg2);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
-.pay-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.2rem;cursor:pointer;user-select:none;gap:10px;flex-wrap:wrap}
-.pay-panel-hdr:hover{background:var(--bg3)}
-.pay-panel-hdr .ph-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pay-panel-hdr .ph-title{font-size:13px;font-weight:600;color:var(--text)}
-.pay-period{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
-.period-nav{display:flex;align-items:center;gap:4px}
-.period-nav button{font-size:11px;padding:3px 8px;background:transparent;border:1px solid var(--border2);border-radius:7px;color:var(--text2);cursor:pointer;line-height:1.4}
-.period-nav button:hover{background:var(--bg3);color:var(--text)}
-.pay-chev{font-size:14px;color:var(--text3);transition:transform .18s;display:inline-block;margin-left:4px}
-.pay-panel.open .pay-chev{transform:rotate(180deg)}
-.pay-body{display:none;padding:.75rem 1.2rem 1rem;border-top:1px solid var(--border)}
-.pay-panel.open .pay-body{display:block}
-.pay-fields{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.pay-field{display:flex;flex-direction:column;gap:4px;min-width:130px}
-.pay-field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
-.pay-field input{font-size:14px;font-weight:500;font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;outline:none;width:130px}
-.pay-field input:focus{border-color:var(--spend)}
-.pay-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.ps-chip{background:var(--bg3);border-radius:8px;padding:6px 10px;min-width:110px}
-.ps-chip .pc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px}
-.ps-chip .pc-val{font-size:15px;font-weight:600;font-family:'DM Mono',monospace}
-.pc-val.spend-col{color:var(--spend)}
-.pc-val.danger-col{color:var(--danger)}
-.pc-val.ok-col{color:var(--ok)}
-.pc-val.warn-col{color:var(--warn)}
+
+.bulk-bar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.bulk-bar button{font-size:12px;font-weight:500;font-family:inherit;padding:6px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text2);cursor:pointer;white-space:nowrap}
+.bulk-bar button:hover{background:var(--bg3);color:var(--text)}
 
 .sections{display:flex;flex-direction:column;gap:8px}
 .section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
@@ -256,12 +225,6 @@ footer{font-size:11px;color:var(--text3);text-align:center;margin-top:1.5rem;pad
       <div class="ac-divider"></div>
       <div class="ac-field-lbl">Enter balance</div>
       <input class="ac-input" type="number" id="spend-start" value="0" min="0" step="0.01" placeholder="0.00" oninput="save();recalc()">
-      <div id="spend-projections" style="display:none">
-        <div class="ac-after-lbl">After bills</div>
-        <div class="ac-after" id="spend-after">—</div>
-        <div class="ac-after-lbl" style="margin-top:6px">Weekly spending</div>
-        <div class="ac-after" id="spend-weekly">—</div>
-      </div>
     </div>
     <div class="acct-card living">
       <div class="ac-label">Living</div>
@@ -270,8 +233,6 @@ footer{font-size:11px;color:var(--text3);text-align:center;margin-top:1.5rem;pad
       <div class="ac-divider"></div>
       <div class="ac-field-lbl">Enter balance</div>
       <input class="ac-input" type="number" id="living-start" value="0" min="0" step="0.01" placeholder="0.00" oninput="save();recalc()">
-      <div class="ac-after-lbl" id="living-after-lbl" style="display:none">After transfer</div>
-      <div class="ac-after" id="living-after" style="display:none">—</div>
     </div>
     <div class="acct-card sav">
       <div class="ac-label">Savings</div>
@@ -280,8 +241,6 @@ footer{font-size:11px;color:var(--text3);text-align:center;margin-top:1.5rem;pad
       <div class="ac-divider"></div>
       <div class="ac-field-lbl">Enter balance</div>
       <input class="ac-input" type="number" id="sav-start" value="0" min="0" step="0.01" placeholder="0.00" oninput="save();recalc()">
-      <div class="ac-after-lbl" id="sav-after-lbl" style="display:none">After deposit</div>
-      <div class="ac-after" id="sav-after" style="display:none">—</div>
     </div>
   </div>
 
@@ -299,35 +258,9 @@ footer{font-size:11px;color:var(--text3);text-align:center;margin-top:1.5rem;pad
     </div>
   </div>
 
-  <div class="pay-panel" id="pay-panel">
-    <div class="pay-panel-hdr" onclick="togglePayPanel()">
-      <div class="ph-left">
-        <span class="ph-title">💵 Paycheck</span>
-        <div class="period-nav">
-          <button onclick="event.stopPropagation();shiftP(-1)">‹</button>
-          <button onclick="event.stopPropagation();resetP()">Today</button>
-          <button onclick="event.stopPropagation();shiftP(1)">›</button>
-        </div>
-        <span class="pay-period" id="pay-period-label">—</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:12px;color:var(--text3)" id="pay-panel-sum">not applied</span>
-        <span class="pay-chev">⌄</span>
-      </div>
-    </div>
-    <div class="pay-body">
-      <div class="pay-fields">
-        <div class="pay-field">
-          <label>Check amount</label>
-          <input type="number" id="gross" value="0" min="0" step="1" placeholder="2498" oninput="save();recalc()">
-        </div>
-        <div class="pay-field" style="justify-content:flex-end">
-          <label>&nbsp;</label>
-          <button onclick="applyPaycheck()" style="font-size:12px;font-weight:600;padding:8px 16px;background:var(--spend);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit">Apply to balances</button>
-        </div>
-      </div>
-      <div class="pay-summary" id="pay-summary"></div>
-    </div>
+  <div class="bulk-bar">
+    <button id="bulk-paid-btn" onclick="toggleAllPaid()">✓ Mark all paid</button>
+    <button id="bulk-visible-btn" onclick="toggleAllVisible()">🚫 Exclude all</button>
   </div>
 
   <div class="sections" id="sections"></div>
@@ -366,8 +299,9 @@ footer{font-size:11px;color:var(--text3);text-align:center;margin-top:1.5rem;pad
 
 <script>
 // ─── Period math ───────────────────────────────────────────────────────────
+// Only used to date snapshots: always the two-week period containing today.
 const BASE_PAY = new Date('2026-06-05');
-let pOff = 0;
+const pOff = Math.floor((Date.now() - BASE_PAY) / (14 * 24 * 60 * 60 * 1000));
 
 function payDate(off){
   const d=new Date(BASE_PAY);
@@ -376,13 +310,6 @@ function payDate(off){
 }
 function fmt(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fm(n){return '$'+(Math.abs(n)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function shiftP(d){pOff+=d;updatePeriodLabel();recalc();}
-function resetP(){pOff=0;updatePeriodLabel();recalc();}
-function updatePeriodLabel(){
-  const pd=payDate(pOff);
-  const end=new Date(pd);end.setDate(end.getDate()+13);
-  document.getElementById('pay-period-label').textContent=fmt(pd)+' – '+fmt(end);
-}
 
 // ─── Sections ─────────────────────────────────────────────────────────────
 const SECTIONS=[
@@ -471,37 +398,57 @@ function togglePaid(itemId, secId, checked){
   recalc();
 }
 
-// ─── Paycheck panel ────────────────────────────────────────────────────────
-function togglePayPanel(){
-  document.getElementById('pay-panel').classList.toggle('open');
+// ─── Bulk toggles ──────────────────────────────────────────────────────────
+// One button each for paid and include/exclude. If every line is already on,
+// the button turns them all off; otherwise it turns them all on.
+// Reference sections have neither control, so they're skipped.
+function bulkItems(){
+  const out=[];
+  SECTIONS.forEach(sec=>{
+    if(sec.reference) return;
+    sec.items.forEach(it=>out.push({sec,it}));
+  });
+  return out;
 }
 
-function applyPaycheck(){
-  const gross=parseFloat(document.getElementById('gross').value)||0;
-  if(!gross) return;
-  const cur=parseFloat(document.getElementById('spend-start').value)||0;
-  document.getElementById('spend-start').value=(cur+gross).toFixed(2);
-  save();recalc();
-  document.getElementById('pay-panel-sum').textContent='✓ applied '+fm(gross);
-  document.getElementById('pay-panel').classList.remove('open');
+// Excluded rows can't be ticked individually, so they don't count here either.
+function allPaid(){
+  const items=bulkItems().filter(({sec,it})=>isOn(sec.id,it.id));
+  return items.length>0 && items.every(({it})=>paid[it.id]!==undefined);
+}
+function allVisible(){
+  return bulkItems().every(({sec,it})=>isOn(sec.id,it.id));
+}
+
+function toggleAllPaid(){
+  const mark=!allPaid();
+  bulkItems().forEach(({sec,it})=>{
+    if(mark && isOn(sec.id,it.id)) paid[it.id]=getAmt(sec.id,it.id);
+    else if(!mark) delete paid[it.id];
+  });
+  save(); buildUI();
+}
+
+function toggleAllVisible(){
+  const show=!allVisible();
+  bulkItems().forEach(({sec,it})=>{ state[sec.id][it.id].enabled=show; });
+  save(); buildUI();
+}
+
+function updateBulkButtons(){
+  document.getElementById('bulk-paid-btn').textContent=allPaid()?'↺ Unmark all paid':'✓ Mark all paid';
+  document.getElementById('bulk-visible-btn').textContent=allVisible()?'🚫 Exclude all':'👁 Include all';
 }
 
 // ─── Recalc ────────────────────────────────────────────────────────────────
 function recalc(){
-  const gross=parseFloat(document.getElementById('gross').value)||0;
-  let alloc=0,livingOut=0,savOut=0;
+  let alloc=0;
 
   SECTIONS.forEach(sec=>{
     const tot=secTotal(sec);
     const el=document.getElementById('sub-'+sec.id);
     if(el) el.textContent=fm(tot);
     if(!sec.reference) alloc+=tot;
-    sec.items.forEach(it=>{
-      if(!isOn(sec.id,it.id)) return;
-      const a=getAmt(sec.id,it.id);
-      if(it.affectsLiving) livingOut+=a;
-      if(it.affectsSavings) savOut+=a;
-    });
   });
 
   // spend-start is the raw entered balance — never mutated by checkboxes.
@@ -516,43 +463,8 @@ function recalc(){
   setBalance('living-bal', livingStart, 'living');
   setBalance('sav-bal', savStart, 'sav');
 
-  // Projections and summary bar: always use raw spendStart (checkbox-agnostic)
-  const showProjections = gross > 0;
-  const spendProjections=document.getElementById('spend-projections');
-  const spendAfterEl=document.getElementById('spend-after');
-  const spendWeeklyEl=document.getElementById('spend-weekly');
-  const livingAfterEl=document.getElementById('living-after');
-  const livingAfterLbl=document.getElementById('living-after-lbl');
-  const savAfterEl=document.getElementById('sav-after');
-  const savAfterLbl=document.getElementById('sav-after-lbl');
-
-  if(showProjections){
-    const spA = spendStart + gross - alloc;
-    const spW = spA / 2;
-    const lvA = livingStart + livingOut;
-    const svA = savStart + savOut;
-
-    spendProjections.style.display='';
-    spendAfterEl.textContent=fm(spA); spendAfterEl.className='ac-after'+(spA<0?' neg':'');
-    spendWeeklyEl.textContent=fm(spW); spendWeeklyEl.className='ac-after'+(spW<0?' neg':'');
-    livingAfterEl.textContent=fm(lvA); livingAfterEl.className='ac-after'+(lvA<0?' neg':'');
-    livingAfterEl.style.display=''; livingAfterLbl.style.display='';
-    savAfterEl.textContent=fm(svA); savAfterEl.className='ac-after'+(svA<0?' neg':'');
-    savAfterEl.style.display=''; savAfterLbl.style.display='';
-
-    const rem=gross-alloc; const wk=rem/2;
-    buildPaySummary(gross,alloc,rem,wk);
-    document.getElementById('pay-panel-sum').textContent=fm(gross)+' entered';
-  } else {
-    spendProjections.style.display='none';
-    livingAfterEl.style.display='none'; livingAfterLbl.style.display='none';
-    savAfterEl.style.display='none'; savAfterLbl.style.display='none';
-    document.getElementById('pay-summary').innerHTML='';
-    document.getElementById('pay-panel-sum').textContent='not applied';
-  }
-
   // Summary bar — always based on raw spendStart, never affected by checkboxes
-  const baseAvail = showProjections ? spendStart + gross - alloc : spendStart - alloc;
+  const baseAvail = spendStart - alloc;
   const wkAmt = baseAvail / 2;
   const aEl=document.getElementById('avail-big');
   aEl.textContent=fm(baseAvail);
@@ -560,28 +472,14 @@ function recalc(){
   const wEl=document.getElementById('weekly-big');
   wEl.textContent=fm(wkAmt);
   wEl.className='wr wr-sm'+(wkAmt<0?' neg':'');
+
+  updateBulkButtons();
 }
 
 function setBalance(id, val, type){
   const el=document.getElementById(id);
   el.textContent=fm(val);
   el.className='ac-balance'+(val<0?' neg':'');
-}
-
-function buildPaySummary(gross,alloc,rem,wk){
-  const c=document.getElementById('pay-summary');
-  c.innerHTML='';
-  const chips=[
-    {lbl:'Gross check',val:fm(gross),cls:'spend-col'},
-    {lbl:'Allocated',val:fm(alloc),cls:'danger-col'},
-    {lbl:'Remaining',val:fm(rem),cls:rem>=0?'ok-col':'danger-col'},
-    {lbl:'Weekly',val:fm(wk),cls:wk>=0?'warn-col':'danger-col'},
-  ];
-  chips.forEach(ch=>{
-    const d=document.createElement('div'); d.className='ps-chip';
-    d.innerHTML=`<div class="pc-lbl">${ch.lbl}</div><div class="pc-val ${ch.cls}">${ch.val}</div>`;
-    c.appendChild(d);
-  });
 }
 
 // ─── Google Sheets sync ────────────────────────────────────────────────────
@@ -603,11 +501,9 @@ function saveScriptUrl(){ closeSetup(); }
 
 function buildPayload(){
   return {
-    gross: document.getElementById('gross').value,
     spendStart: document.getElementById('spend-start').value,
     livingStart: document.getElementById('living-start').value,
     savStart: document.getElementById('sav-start').value,
-    pOff,
     state: JSON.parse(JSON.stringify(state)),
     paid: JSON.parse(JSON.stringify(paid)),   // ← persisted now
     customItems: SECTIONS.filter(s=>s.addable).map(s=>({sid:s.id,items:s.items.filter(i=>i.deletable)}))
@@ -663,7 +559,6 @@ async function confirmSnapshot(){
   const btn=document.getElementById('snap-btn');
   btn.disabled=true; btn.textContent='Saving…';
   try{
-    const gross=parseFloat(document.getElementById('gross').value)||0;
     let alloc=0;
     SECTIONS.forEach(sec=>{
       if(!sec.reference) alloc+=secTotal(sec);
@@ -673,7 +568,7 @@ async function confirmSnapshot(){
     const savStart=parseFloat(document.getElementById('sav-start').value)||0;
     const pd=payDate(pOff);
     const periodEnd=new Date(pd); periodEnd.setDate(periodEnd.getDate()+13);
-    const avail=spendStart+(gross||0)-alloc;
+    const avail=spendStart-alloc;
     const pt=paidTotal();
 
     // Build human-readable paid items list for Sheets
@@ -690,7 +585,7 @@ async function confirmSnapshot(){
       timestamp: new Date().toISOString(),
       periodStart: fmt(pd),
       periodEnd: fmt(periodEnd),
-      checkAmount: gross,
+      checkAmount: 0,                       // paycheck feature removed; kept so Sheet columns stay aligned
       spendBalance: spendStart,
       livingBalance: livingStart,
       savingsBalance: savStart,
@@ -744,11 +639,9 @@ function save(){
 }
 
 function applyLoadedData(data){
-  if(data.gross!=null) document.getElementById('gross').value=data.gross;
   if(data.spendStart!=null) document.getElementById('spend-start').value=data.spendStart;
   if(data.livingStart!=null) document.getElementById('living-start').value=data.livingStart;
   if(data.savStart!=null) document.getElementById('sav-start').value=data.savStart;
-  if(data.pOff!=null) pOff=data.pOff;
 
   if(data.state){
     Object.keys(data.state).forEach(sid=>{
@@ -783,9 +676,9 @@ function loadSaved(){
   if(SCRIPT_URL){
     setSyncStatus('warn','Connecting…');
     loadFromSheets().then(ok=>{
-      if(ok){ buildUI(); updatePeriodLabel(); return; }
+      if(ok){ buildUI(); return; }
       loadFromLocalStorage();
-      buildUI(); updatePeriodLabel();
+      buildUI();
     });
     return;
   }
